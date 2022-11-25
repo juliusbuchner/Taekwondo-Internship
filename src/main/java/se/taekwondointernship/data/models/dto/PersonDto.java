@@ -24,5 +24,5 @@ public class PersonDto {
 
     private boolean permissionPhoto;
 
-    private List<PassDtoSmall> passList;
+   // private List<PassDtoSmall> passList;
 }

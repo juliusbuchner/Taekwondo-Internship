@@ -37,7 +37,7 @@ public class Person {
 
     public void addToPass(Pass pass){
         passList.add(pass);
-        pass.addToList(this);
+       // pass.addToList(this);
     }
     public String toStringSmall(){
         return "[Namn: " + firstName + " " + lastName +
