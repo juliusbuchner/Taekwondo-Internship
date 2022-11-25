@@ -23,6 +23,4 @@ public class PersonDto {
     private String socialSecurityNumber;
 
     private boolean permissionPhoto;
-
-   // private List<PassDtoSmall> passList;
 }

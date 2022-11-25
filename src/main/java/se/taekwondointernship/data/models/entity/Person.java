@@ -3,7 +3,6 @@ package se.taekwondointernship.data.models.entity;
 import lombok.*;
 
 import javax.persistence.*;
-import java.util.List;
 
 @Getter
 @Setter
@@ -31,14 +30,6 @@ public class Person {
     private String socialSecurityNumber;
 
     private boolean permissionPhoto;
-
-    @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.REFRESH}, fetch = FetchType.LAZY, mappedBy = "participant")
-    private List<Pass> passList;
-
-    public void addToPass(Pass pass){
-        passList.add(pass);
-       // pass.addToList(this);
-    }
     public String toStringSmall(){
         return "[Namn: " + firstName + " " + lastName +
                 ", Telefonnumner: " + phoneNumber +
