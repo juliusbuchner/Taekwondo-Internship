@@ -1,4 +1,4 @@
-package se.taekwondointernship.data.models.dto;
+package se.taekwondointernship.data.models.form;
 
 import lombok.*;
 
