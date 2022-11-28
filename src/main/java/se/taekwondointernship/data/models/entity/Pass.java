@@ -26,14 +26,16 @@ public class Pass {
     private Integer passId;
     private String firstName;
     private String lastName;
+    private String parentName;
     private String parentPhoneNumber;
     private String className;
     private LocalDate date=LocalDate.now();
 
-    public Pass(String firstName, String lastName, String parentPhoneNumber, String className){
+    public Pass(String firstName, String lastName,String parentName, String parentPhoneNumber, String className){
 
         this.firstName=firstName;
         this.lastName=lastName;
+        this.parentName=parentName;
         this.parentPhoneNumber=parentPhoneNumber;
         this.className=className;
     }
