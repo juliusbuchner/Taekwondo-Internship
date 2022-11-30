@@ -1,10 +1,12 @@
 package se.taekwondointernship.data.service;
 
-import aj.org.objectweb.asm.TypeReference;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
+import org.modelmapper.internal.bytebuddy.asm.Advice;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,44 +18,28 @@ import se.taekwondointernship.data.repository.PassRepository;
 
 import java.io.*;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class PassServiceImplementation implements PassService {
     private final ModelMapper modelMapper;
-    private final ObjectMapper objectMapper;
+    private final JsonService jsonService=new JsonService();
     private final PassRepository passRepository;
+    private final ObjectMapper objectMapper;
+    private JSONArray jsonArray=new JSONArray();
+    private JSONObject passList=new JSONObject();
+    JSONObject jsonObject = new JSONObject();
+
 
 
     @Autowired
-    public PassServiceImplementation(ModelMapper modelMapper, ObjectMapper objectMapper,PassRepository passRepository) {
+    public PassServiceImplementation(ModelMapper modelMapper,ObjectMapper objectMapper,PassRepository passRepository) {
         this.modelMapper = modelMapper;
-        this.objectMapper=objectMapper;
         this.passRepository = passRepository;
+        this.objectMapper=objectMapper;
+
     }
 
-  //  @Override
-   // public PassDto create(PassForm form) {
-     //   Pass pass=modelMapper.map(form, Pass.class);
-       /* String passJsonString = this.getJsonStringFromObject(pass);
-        JSONObject jsonObject=new JSONObject();
-        jsonObject.put("className",pass.getClassName());
-        jsonObject.put("firstName",pass.getFirstName());
-        jsonObject.put("lastName",pass.getLastName());
-        jsonObject.put("parentPhoneNumber",pass.getParentPhoneNumber());
-        jsonObject.put("Date",pass.getDate());
-        try(FileWriter file=new FileWriter("C:\\JSON\\Pass.json")){
-            file.write(jsonObject.toJSONString());
-            file.flush();
-            return "File Created";
-        }catch(IOException e){
-            e.printStackTrace();
-            return "File Not created";
-
-        } */
-       // Pass savedPass=passRepository.save(pass);
-        //return modelMapper.map(savedPass, PassDto.class);
-
-  //  }
 
 
     //Get Data from PostMan
@@ -61,59 +47,102 @@ public class PassServiceImplementation implements PassService {
     //Store values into Json
     @Override
     @Transactional
-
     public PassDto create(PassForm form) {
         Pass pass= passRepository.save(modelMapper.map(form,Pass.class));
         System.out.println(pass);
-        JSONObject jsonObject = new JSONObject();
+
+       jsonArray= jsonService.getJson();
 
 
-        PassDto returnValue;
-        try {
+            jsonObject.put("Id",pass.getPassId());
             jsonObject.put("firstName", pass.getFirstName());
-            jsonObject.put("lastName", form.getLastName());
-            jsonObject.put("parentName", form.getParentName());
-            jsonObject.put("parentPhoneNumber", form.getParentPhoneNumber());
-            jsonObject.put("className", form.getClassName());
+            jsonObject.put("lastName", pass.getLastName());
+            jsonObject.put("parentName", pass.getParentName());
+            jsonObject.put("parentPhoneNumber", pass.getParentPhoneNumber());
+            jsonObject.put("className", pass.getClassName());
+            //passList.put("passList",jsonObject);
+            jsonArray.add(jsonObject);
 
-            FileWriter file = new FileWriter("C:\\JSON\\pass.json");
-            file.write(jsonObject.toJSONString());
-            returnValue = modelMapper.map(file, PassDto.class);
-            file.flush();
-
-
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        return returnValue;
+        jsonService.saveJson(jsonArray);
+            Pass saved=  modelMapper.map(jsonService.getJson(), Pass.class);
+        return modelMapper.map(saved,PassDto.class);
 
     }
 
 
-
-
-        @Transactional
+    @Transactional
     @Override
-    public List<PassDto> findAll() {
-        List<Pass> foundAll=passRepository.findAll();
-        List<PassDto> ListOfPersons=modelMapper.map(foundAll,new TypeToken<List<PassDto>>(){}.getType());
-        return ListOfPersons;
+    public List<PassDto> findAll() throws IOException {
+             JSONArray foundAll=jsonService.getJson();
+
+        List<Pass> passlist= convertJsonArrayToPassList(foundAll);
+        return modelMapper.map(passlist, new TypeToken<List<PassDto>>(){}.getType());
+
     }
-@Transactional
+
+    private List<Pass> convertJsonArrayToPassList(JSONArray jsonArray){
+     return (List<Pass>) jsonArray.stream()
+                .map(jsonObject -> {
+                    try {
+                        String json = objectMapper.writeValueAsString(jsonObject);
+                        return objectMapper.readValue(json, Pass.class);
+                    } catch (JsonProcessingException e) {
+                       e.printStackTrace();
+                    }
+                    return null;
+                })
+                .collect(Collectors.toList());
+    }
+
+
+@Transactional(readOnly = true)
     @Override
     public PassDto findByName(String firstName, String lastName) {
         if(firstName==null) throw new IllegalArgumentException("First Name is null");
-        Pass foundName = passRepository.findByName(firstName,lastName).orElseThrow(() -> new ResourceNotFoundException("Name not found"));
-        return modelMapper.map(foundName,PassDto.class);
+        if(lastName==null) throw new IllegalArgumentException("Last Name is null");
+    List<PassDto> found= null;
+    try {
+        found = findAll();
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
+    PassDto foundByName=found.stream()
+            .filter(passDto -> passDto.getFirstName().equals(firstName) && passDto.getLastName().equals(lastName))
+            .findFirst()
+            .orElseThrow( () -> new ResourceNotFoundException("Name not found"));
+        return foundByName;
     }
 
-    private String getJsonStringFromObject(Object object) {
-        try {
-            return objectMapper.writeValueAsString(object);
-        } catch (Exception ex) {
-
-            return null;
+    @Transactional(readOnly = true)
+    @Override
+    public List<PassDto> findAllByClassName(String className) {
+        if(className==null) throw new IllegalArgumentException("Class Name is null");
+        List<PassDto> found= null;
+        try{
+            found=findAll();
+        }catch (IOException e){
+            e.printStackTrace();
         }
+        List<PassDto> foundAllByClassName= found.stream()
+                .filter(passDto -> passDto.getClassName().equalsIgnoreCase(className)).collect(Collectors.toList());
+        return foundAllByClassName;
     }
+    @Transactional(readOnly = true)
+    @Override
+    public PassDto findByNameAndClassName(String firstName, String lastName, String className) {
+        if(firstName==null) throw new IllegalArgumentException("First Name is null");
+        if(lastName==null) throw new IllegalArgumentException("Last Name is null");
+        if(className==null) throw new IllegalArgumentException("Class Name is null");
+        List<PassDto> found=null;
+        try{
+            found=findAll();
+        }catch(IOException e){
+            e.printStackTrace();
+        }
+        PassDto foundByNameAndClassName= found.stream()
+                .filter(passDto -> passDto.getFirstName().equalsIgnoreCase(firstName)&& passDto.getLastName().equalsIgnoreCase(lastName) && passDto.getClassName().equalsIgnoreCase(className))
+                .findFirst().orElseThrow(()->new ResourceNotFoundException("Cannot find by FirstName, Last Name and ClassName"));
+                return foundByNameAndClassName;
+    }
+
 }

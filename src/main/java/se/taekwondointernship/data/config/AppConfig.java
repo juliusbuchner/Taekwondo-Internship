@@ -14,10 +14,5 @@ public class AppConfig {
         return new ModelMapper();
     }
 
-    @Bean
-    public ObjectMapper objectMapper(){
-        return new Jackson2ObjectMapperBuilder()
-                .indentOutput(true)
-                .propertyNamingStrategy(PropertyNamingStrategy.UPPER_CAMEL_CASE).build();
-    }
+
 }
