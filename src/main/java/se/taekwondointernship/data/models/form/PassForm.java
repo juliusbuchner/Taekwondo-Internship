@@ -1,8 +1,10 @@
 package se.taekwondointernship.data.models.form;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 import org.springframework.context.annotation.Bean;
 
+import java.time.LocalDate;
 import java.util.Objects;
 
 public class PassForm {
@@ -12,13 +14,19 @@ public class PassForm {
     private String parentPhoneNumber;
     private String parentName;
     private String className;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern="dd-MM-yyyy")
+    private LocalDate date=LocalDate.now();
+    private String age;
 
-    public PassForm(String firstName, String lastName, String parentPhoneNumber, String parentName, String className) {
+
+    public PassForm(String firstName, String lastName, String parentPhoneNumber, String parentName, String className, LocalDate date, String age) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.parentPhoneNumber = parentPhoneNumber;
         this.parentName = parentName;
         this.className = className;
+        this.date=LocalDate.now();
+        this.age=age;
     }
 
     public PassForm() {
@@ -64,6 +72,21 @@ public class PassForm {
         this.className = className;
     }
 
+    public LocalDate getDate() {
+        return date;
+    }
+
+    public void setDate(LocalDate date) {
+        this.date = date;
+    }
+
+    public String getAge() {
+        return age;
+    }
+    public void setAge(String age) {
+        this.age = age;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -76,7 +99,9 @@ public class PassForm {
         if (!Objects.equals(parentPhoneNumber, passForm.parentPhoneNumber))
             return false;
         if (!Objects.equals(parentName, passForm.parentName)) return false;
-        return Objects.equals(className, passForm.className);
+        if (!Objects.equals(className, passForm.className)) return false;
+        if (!Objects.equals(date, passForm.date)) return false;
+        return Objects.equals(age, passForm.age);
     }
 
     @Override
@@ -86,6 +111,8 @@ public class PassForm {
         result = 31 * result + (parentPhoneNumber != null ? parentPhoneNumber.hashCode() : 0);
         result = 31 * result + (parentName != null ? parentName.hashCode() : 0);
         result = 31 * result + (className != null ? className.hashCode() : 0);
+        result = 31 * result + (date != null ? date.hashCode() : 0);
+        result = 31 * result + (age != null ? age.hashCode() : 0);
         return result;
     }
 
@@ -97,6 +124,8 @@ public class PassForm {
                 ", parentPhoneNumber='" + parentPhoneNumber + '\'' +
                 ", parentName='" + parentName + '\'' +
                 ", className='" + className + '\'' +
+                ", date=" + date +
+                ", age='" + age + '\'' +
                 '}';
     }
 }

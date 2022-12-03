@@ -9,9 +9,19 @@ import se.taekwondointernship.data.models.dto.PassDto;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.temporal.WeekFields;
+import java.util.Locale;
 
 public class JsonService {
-   private static final String PATH ="C:\\JSON\\pass.json";
+    LocalDate date=LocalDate.now();
+    int weekOfYear=date.get(WeekFields.of(Locale.getDefault()).weekOfYear());
+
+    private  String fileName="pass_"+date+".json";
+    private String directoryName="C:\\JSON\\"+"Week"+weekOfYear+"_"+date.getYear();
+    File f=new File(directoryName);
+    boolean mkdir=f.mkdir();
+   private final String PATH =directoryName+"\\"+fileName;
    private ObjectMapper objectMapper = new ObjectMapper();
 
    public JsonService() {
@@ -21,6 +31,8 @@ public class JsonService {
     public void saveJson(Object object){
         //Get data
         //Write into JSON file
+
+       // System.out.println(weekOfYear);
 
         try {
 

@@ -24,10 +24,10 @@ import java.util.stream.Collectors;
 public class PassServiceImplementation implements PassService {
     private final ModelMapper modelMapper;
     private final JsonService jsonService=new JsonService();
-    private final PassRepository passRepository;
+    private  final PassRepository passRepository;
     private final ObjectMapper objectMapper;
     private JSONArray jsonArray=new JSONArray();
-    private JSONObject passList=new JSONObject();
+  //  private JSONObject passList=new JSONObject();
     JSONObject jsonObject = new JSONObject();
 
 
@@ -39,6 +39,10 @@ public class PassServiceImplementation implements PassService {
         this.objectMapper=objectMapper;
 
     }
+
+//    public PassServiceImplementation(){}
+
+
 
 
 
@@ -54,18 +58,20 @@ public class PassServiceImplementation implements PassService {
        jsonArray= jsonService.getJson();
 
 
-            jsonObject.put("Id",pass.getPassId());
+            jsonObject.put("id",pass.getPassId());
             jsonObject.put("firstName", pass.getFirstName());
             jsonObject.put("lastName", pass.getLastName());
             jsonObject.put("parentName", pass.getParentName());
             jsonObject.put("parentPhoneNumber", pass.getParentPhoneNumber());
             jsonObject.put("className", pass.getClassName());
+            jsonObject.put("date",pass.getDate().toString());
+            jsonObject.put("age",pass.getAge());
             //passList.put("passList",jsonObject);
             jsonArray.add(jsonObject);
 
         jsonService.saveJson(jsonArray);
             Pass saved=  modelMapper.map(jsonService.getJson(), Pass.class);
-        return modelMapper.map(saved,PassDto.class);
+        return modelMapper.map(pass,PassDto.class);
 
     }
 
@@ -75,8 +81,8 @@ public class PassServiceImplementation implements PassService {
     public List<PassDto> findAll() throws IOException {
              JSONArray foundAll=jsonService.getJson();
 
-        List<Pass> passlist= convertJsonArrayToPassList(foundAll);
-        return modelMapper.map(passlist, new TypeToken<List<PassDto>>(){}.getType());
+        List<Pass> passList= convertJsonArrayToPassList(foundAll);
+        return modelMapper.map(passList, new TypeToken<List<PassDto>>(){}.getType());
 
     }
 
@@ -107,7 +113,7 @@ public class PassServiceImplementation implements PassService {
         e.printStackTrace();
     }
     PassDto foundByName=found.stream()
-            .filter(passDto -> passDto.getFirstName().equals(firstName) && passDto.getLastName().equals(lastName))
+            .filter(passDto -> passDto.getFirstName().equalsIgnoreCase(firstName) && passDto.getLastName().equalsIgnoreCase(lastName))
             .findFirst()
             .orElseThrow( () -> new ResourceNotFoundException("Name not found"));
         return foundByName;
