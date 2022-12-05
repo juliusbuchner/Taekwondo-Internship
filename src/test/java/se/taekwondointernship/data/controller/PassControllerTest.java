@@ -71,10 +71,6 @@ class PassControllerTest {
 
         }
 
-        void delete(){
-            f.delete();
-
-        }
 
     JSONArray jsonSetUp() throws JsonProcessingException{
         PassForm form=new PassForm();
