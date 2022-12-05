@@ -7,8 +7,6 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.junit.Before;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
@@ -16,22 +14,16 @@ import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.AutoConfigureTestEntityManager;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MockMvcBuilder;
-import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 import se.taekwondointernship.data.exceptions.ResourceNotFoundException;
 import se.taekwondointernship.data.models.dto.PassDto;
-import se.taekwondointernship.data.models.entity.Pass;
-import se.taekwondointernship.data.models.entity.Response;
 import se.taekwondointernship.data.models.form.PassForm;
 
 import java.io.File;
@@ -72,7 +64,7 @@ class PassControllerTest {
     JSONArray jsonArray=new JSONArray();
     String PATH;
     @BeforeEach
-    private void setUp()  {
+    public void setUp()  {
         mockMvc= MockMvcBuilders.webAppContextSetup(context).build();
         objectMapper.registerModule(new JavaTimeModule());
         objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS,false);
@@ -183,6 +175,10 @@ class PassControllerTest {
                     assertEquals(actualResponse.getClassName(),pass.getClassName());
 
                 });
+        if(f.exists()){
+            f.delete();
+        }
+
 
                    }
 
@@ -204,6 +200,10 @@ class PassControllerTest {
                     List<PassDto> actualResponse= objectMapper.readValue(response,typeReference);
                     assertEquals(expectedResult.size(),actualResponse.size());
                 } );
+
+        if(f.exists()){
+            f.delete();
+        }
     }
 
 
@@ -234,6 +234,9 @@ class PassControllerTest {
                     assertEquals(actualResponse.getAge(),expectedValue.getAge());
                     assertEquals(actualResponse.getDate(),expectedValue.getDate());
                 });
+        if(f.exists()){
+            f.delete();
+        }
     }
 
     @Test
@@ -252,7 +255,10 @@ class PassControllerTest {
                 List<PassDto> actualResponse=objectMapper.readValue(response,typeReference);
                 assertEquals(expectedValue.size(),actualResponse.size());
             });
-    f.delete();
+
+        if(f.exists()){
+            f.delete();
+        }
     }
 
     @Test
@@ -280,6 +286,8 @@ class PassControllerTest {
                     assertEquals(expectedResponse.getClassName(),actualResponse.getClassName());
                     assertEquals(expectedResponse.getAge(),actualResponse.getAge());
                 });
-f.delete();
+        if(f.exists()){
+            f.delete();
+        }
     }
 }
