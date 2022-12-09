@@ -85,7 +85,7 @@ class PassControllerTest {
         int weekOfYear=date.get(WeekFields.of(Locale.getDefault()).weekOfYear());
 
         String fileName="pass_"+date+".json";
-        String directoryName="C:\\JSON\\Test\\"+"Week"+weekOfYear+"_"+date.getYear();
+        String directoryName="C:\\JSON\\"+"Week"+weekOfYear+"_"+date.getYear();
         f=new File(directoryName);
         boolean mkdir=f.mkdir();
          PATH =directoryName+"\\"+fileName;
@@ -171,10 +171,6 @@ class PassControllerTest {
                     assertEquals(actualResponse.getClassName(),pass.getClassName());
 
                 });
-        if(f.exists()){
-            f.delete();
-        }
-
 
                    }
 
