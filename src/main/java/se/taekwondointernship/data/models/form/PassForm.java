@@ -18,8 +18,10 @@ public class PassForm {
     private LocalDate date=LocalDate.now();
     private String age;
 
+    PersonSmallForm person;
 
-    public PassForm(String firstName, String lastName, String parentPhoneNumber, String parentName, String className, LocalDate date, String age) {
+
+    public PassForm(String firstName, String lastName, String parentPhoneNumber, String parentName, String className, LocalDate date, String age, PersonSmallForm personSmallForm) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.parentPhoneNumber = parentPhoneNumber;
@@ -27,6 +29,7 @@ public class PassForm {
         this.className = className;
         this.date=LocalDate.now();
         this.age=age;
+        this.person=personSmallForm;
     }
 
     public PassForm() {
@@ -85,6 +88,14 @@ public class PassForm {
     }
     public void setAge(String age) {
         this.age = age;
+    }
+
+    public PersonSmallForm getPersonSmallForm() {
+        return person;
+    }
+
+    public void setPersonSmallForm(PersonSmallForm personSmallForm) {
+        this.person = personSmallForm;
     }
 
     @Override
