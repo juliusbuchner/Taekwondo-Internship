@@ -14,6 +14,7 @@ import java.util.Date;
 @EqualsAndHashCode
 
 public class CreatePassDto {
+    private int id;
     private String className;
     private LocalDate date;
     private LocalTime startTime;
