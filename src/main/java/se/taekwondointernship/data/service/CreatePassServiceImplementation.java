@@ -40,9 +40,8 @@ public class CreatePassServiceImplementation implements  CreatePassService{
 
 
     LocalDate date=LocalDate.now();
-    Month month= date.getMonth();
     String fileName="created_pass"+".json";
-    String directoryName="C:\\JSON\\"+month+"_"+date.getYear();
+    String directoryName="C:\\JSON\\"+date.getYear();
     File f=new File(directoryName);
 
     boolean mkdir=f.mkdir();

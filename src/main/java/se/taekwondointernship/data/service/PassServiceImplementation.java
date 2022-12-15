@@ -10,9 +10,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import se.taekwondointernship.data.exceptions.ResourceNotFoundException;
+import se.taekwondointernship.data.models.dto.CreatePassDto;
 import se.taekwondointernship.data.models.dto.PassDto;
 import se.taekwondointernship.data.models.dto.PersonDto;
 import se.taekwondointernship.data.models.dto.PersonSmallDto;
+import se.taekwondointernship.data.models.entity.CreatePass;
 import se.taekwondointernship.data.models.entity.Pass;
 import se.taekwondointernship.data.models.entity.Person;
 import se.taekwondointernship.data.models.form.PassForm;
@@ -55,39 +57,57 @@ public class PassServiceImplementation implements PassService {
     File f=new File(directoryName);
     boolean mkdir=f.mkdir();
     final String PATH =directoryName+"\\"+fileName;
-
     final String personPATH="C:\\JSON\\PersonList.json";
+    final String createPassPATH="C:\\JSON\\"+date.getMonth()+"_"+date.getYear()+"\\created_pass.json";
+
 
 
     //Reading the Person file
 
-    public List<PersonSmallDto> readPersonFile(String personPATH){
-
+    public List<Person> readPersonFile(String personPATH){
         JSONArray persons= jsonService.getJson(personPATH);
         List<Person> personList= convertJsonArrayToPersonList(persons);
-        List<PersonSmallDto> personSmallDtos= new ArrayList<>();
-        PersonSmallDto personSmallDto=new PersonSmallDto();
-        for (Person person: personList) {
-           personSmallDto.setPersonId( person.getPersonId());
-           personSmallDto.setFirstName(person.getFirstName());
-           personSmallDto.setLastName(person.getLastName());
-           personSmallDto.setPassCount(person.getPassCount());
-           personSmallDto.setLocked(person.isLocked());
-           personSmallDtos.add(personSmallDto);
+        for (Person p: personList) {
+            System.out.println(p.getPersonId());
+            System.out.println(p.getFirstName());
+            System.out.println(p.getLastName());
+            System.out.println(p.getPassCount());
+            System.out.println(p.isLocked());
         }
-        return modelMapper.map(personSmallDtos, new TypeToken<List<PersonSmallDto>>(){}.getType());
+        return personList;
+    }
 
-
-
-
+    public List<CreatePassDto> readCreatePassFile(String createPassPATH){
+        JSONArray createPasses= jsonService.getJson(createPassPATH);
+        List<CreatePass> createPassList= convertJsonArrayToCreatePassList(createPasses);
+        return modelMapper.map(createPassList,new TypeToken<List<CreatePassDto>>(){}.getType());
 
     }
+
+    private List<CreatePass> convertJsonArrayToCreatePassList(JSONArray createPasses) {
+        return (List<CreatePass>) createPasses.stream()
+                .map(jsonObject -> {
+                    try {
+
+                        String json = objectMapper.writeValueAsString(jsonObject);
+                        return objectMapper.readValue(json, CreatePass.class);
+                    } catch (JsonProcessingException e) {
+                        e.printStackTrace();
+                    }
+                    return null;
+                })
+                .collect(Collectors.toList());
+
+    }
+
+
+
     private List<Person> convertJsonArrayToPersonList(JSONArray persons){
         return (List<Person>) persons.stream()
                 .map(jsonObject -> {
                     try {
 
-                        String json = objectMapper.writeValueAsString(((JSONObject) jsonObject).get("participant"));
+                        String json = objectMapper.writeValueAsString(jsonObject);
                         return objectMapper.readValue(json, Person.class);
                     } catch (JsonProcessingException e) {
                         e.printStackTrace();
@@ -97,9 +117,6 @@ public class PassServiceImplementation implements PassService {
                 .collect(Collectors.toList());
     }
 
-
-
-
     //Get Data from PostMan
     //Get values
     //Store values into Json
@@ -107,59 +124,68 @@ public class PassServiceImplementation implements PassService {
     @Transactional
     public PassDto create(PassForm form) {
 
-        //Checking count variable and lock variable
+        //fetching the specific person
+          List<Person> list= readPersonFile(personPATH);
+          Person foundPerson = list.stream().filter(person -> person.getPersonId()== form.getPersonId()).findAny().orElseThrow(()->new ResourceNotFoundException("Person not found"));
 
-        // fetching the specific person
-          List<PersonSmallDto> list= readPersonFile(personPATH);
-          PersonSmallDto foundPerson= list.stream().filter(personDto -> personDto.getPersonId().equals(form.getPersonSmallForm().getPersonId())
-                                                             && personDto.getFirstName().equalsIgnoreCase(form.getPersonSmallForm().getFirstName())
-          && personDto.getLastName().equalsIgnoreCase(form.getPersonSmallForm().getLastName())
-          ).findAny().orElseThrow(() -> new ResourceNotFoundException("Person not found with id and name"));
+          List<CreatePassDto> createPassList= readCreatePassFile(createPassPATH);
+          CreatePassDto foundCreatePass= createPassList.stream().filter(createPass -> createPass.getId()==form.getCreatePassId()).findAny().orElseThrow(()-> new ResourceNotFoundException("Class not found"));
 
           if(foundPerson.getPassCount()==3){
               foundPerson.setLocked(true);
-              System.out.println("Person is locked, contact admin");
-          }else{
-        Pass pass= passRepository.save(modelMapper.map(form,Pass.class));
-        System.out.println(pass);
+              System.out.println("You can't sign-in, Please contact Admin");
+              jsonService.saveJson(list,personPATH);
+              return null;
+
+          }
+            if(foundPerson.getPassCount()<3 || (foundPerson.getPassCount()>=3 && foundPerson.isLocked()==false)){
+            Pass pass= passRepository.save(modelMapper.map(form,Pass.class));
+           System.out.println(pass);
           jsonArray= jsonService.getJson(PATH);
 
             jsonObject.put("id",pass.getPassId());
-            jsonObject.put("firstName", pass.getFirstName());
-            jsonObject.put("lastName", pass.getLastName());
-            jsonObject.put("parentName", pass.getParentName());
-            jsonObject.put("parentPhoneNumber", pass.getParentPhoneNumber());
-            jsonObject.put("className", pass.getClassName());
-            jsonObject.put("date",pass.getDate().toString());
-            jsonObject.put("age",pass.getAge());
+            jsonObject.put("personId",foundPerson.getPersonId());
+            jsonObject.put("firstName", foundPerson.getFirstName());
+            jsonObject.put("lastName", foundPerson.getLastName());
+            jsonObject.put("parentName", foundPerson.getParentName());
+            jsonObject.put("parentPhoneNumber", foundPerson.getPhoneNumber());
+            jsonObject.put("className", foundCreatePass.getClassName());
+          //  jsonObject.put("date",pass.getDate().toString());
+            jsonObject.put("age",foundPerson.getAge());
             //passList.put("passList",jsonObject);
             jsonArray.add(jsonObject);
 
-        jsonService.saveJson(jsonArray, PATH);
+         jsonService.saveJson(jsonArray, PATH);
             Pass saved=  modelMapper.map(jsonService.getJson(PATH), Pass.class);
-            foundPerson.setPassCount(foundPerson.getPassCount()+1);
-        return modelMapper.map(pass,PassDto.class);
-          }
-        return null;
-    }
+            // increement the passcount
+                foundPerson.setPassCount(foundPerson.getPassCount()+1);
+                jsonService.saveJson(list,personPATH);
 
+            }else{
+                System.out.println("Please contact admin");
+                return null;
+            }
+            //Updating into the person file
+
+        return modelMapper.map(jsonObject,PassDto.class);
+          }
 
     @Transactional
     @Override
     public List<PassDto> findAll() throws IOException {
-             JSONArray foundAll=jsonService.getJson(PATH);
-
-        List<Pass> passList= convertJsonArrayToPassList(foundAll);
-        return modelMapper.map(passList, new TypeToken<List<PassDto>>(){}.getType());
+        JSONArray foundAll=jsonService.getJson(PATH);
+        List<PassDto> passList= convertJsonArrayToPassList(foundAll);
+       // return modelMapper.map(passList, new TypeToken<List<PassDto>>(){}.getType());
+        return passList;
 
     }
 
-    private List<Pass> convertJsonArrayToPassList(JSONArray jsonArray){
-     return (List<Pass>) jsonArray.stream()
+    private List<PassDto> convertJsonArrayToPassList(JSONArray jsonArray){
+     return (List<PassDto>) jsonArray.stream()
                 .map(jsonObject -> {
                     try {
                         String json = objectMapper.writeValueAsString(jsonObject);
-                        return objectMapper.readValue(json, Pass.class);
+                        return objectMapper.readValue(json, PassDto.class);
                     } catch (JsonProcessingException e) {
                        e.printStackTrace();
                     }
@@ -201,6 +227,7 @@ public class PassServiceImplementation implements PassService {
                 .filter(passDto -> passDto.getClassName().equalsIgnoreCase(className)).collect(Collectors.toList());
         return foundAllByClassName;
     }
+
     @Transactional(readOnly = true)
     @Override
     public PassDto findByNameAndClassName(String firstName, String lastName, String className) {

@@ -30,7 +30,11 @@ public class PassController {
         return ResponseEntity.status(HttpStatus.CREATED).body(passService.create(passForm));
        }
 
-
+   /* @PostMapping("/participant")
+    public ResponseEntity<PassDto> createPass(@PathVariable Integer personId,  @PathVariable Integer createPersonId){
+        return ResponseEntity.status(HttpStatus.CREATED).body(passService.create(personId,createPersonId));
+    }
+*/
     @GetMapping("/participantList")
     public ResponseEntity<List<PassDto>> findAll() throws IOException {
         return ResponseEntity.ok(passService.findAll());
