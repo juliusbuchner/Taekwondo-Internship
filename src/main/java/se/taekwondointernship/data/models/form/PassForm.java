@@ -6,8 +6,15 @@ import org.springframework.context.annotation.Bean;
 
 import java.time.LocalDate;
 import java.util.Objects;
-
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString
+@EqualsAndHashCode
 public class PassForm {
+
+    /*
 
     private String firstName;
     private String lastName;
@@ -90,11 +97,11 @@ public class PassForm {
         this.age = age;
     }
 
-    public PersonSmallForm getPersonSmallForm() {
+    public PersonSmallForm getPerson() {
         return person;
     }
 
-    public void setPersonSmallForm(PersonSmallForm personSmallForm) {
+    public void setPerson(PersonSmallForm personSmallForm) {
         this.person = personSmallForm;
     }
 
@@ -138,5 +145,11 @@ public class PassForm {
                 ", date=" + date +
                 ", age='" + age + '\'' +
                 '}';
-    }
+    } */
+
+    private Integer passId;
+    private Integer personId;
+    private Integer createPassId;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern="dd-MM-yyyy")
+    private LocalDate date=LocalDate.now();
 }

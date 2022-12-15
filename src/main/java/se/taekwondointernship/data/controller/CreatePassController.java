@@ -27,6 +27,12 @@ public class CreatePassController {
     public ResponseEntity<CreatePassDto> create(@RequestBody CreatePassForm createPassForm){
         return ResponseEntity.status(HttpStatus.CREATED).body(createPassService.create(createPassForm));
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<CreatePassDto> update(@PathVariable("id") Integer id, @RequestBody CreatePassForm form){
+        return ResponseEntity.ok(createPassService.update(form,id));
+    }
+
     @GetMapping()
     public ResponseEntity<List<CreatePassDto>> findAll(){
         return ResponseEntity.ok(createPassService.findAll());
@@ -39,6 +45,13 @@ public class CreatePassController {
     public ResponseEntity<List<CreatePassDto>> findByDate(@RequestParam("date") @DateTimeFormat(iso=DateTimeFormat.ISO.DATE) LocalDate date){
         return ResponseEntity.ok(createPassService.findByDate(date));
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable("id") Integer id){
+        createPassService.delete(id);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
 
 
 

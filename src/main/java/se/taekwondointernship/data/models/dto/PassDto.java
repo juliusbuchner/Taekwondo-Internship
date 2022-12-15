@@ -12,6 +12,8 @@ import java.time.LocalDate;
 @ToString
 @EqualsAndHashCode
 public class PassDto {
+    private int id;
+    private int personId;
     private String firstName;
     private String lastName;
     private String parentPhoneNumber;

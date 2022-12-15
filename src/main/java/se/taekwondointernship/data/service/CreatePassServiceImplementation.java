@@ -10,6 +10,7 @@ import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import se.taekwondointernship.data.exceptions.ResourceNotFoundException;
 import se.taekwondointernship.data.models.dto.CreatePassDto;
 import se.taekwondointernship.data.models.entity.CreatePass;
 import se.taekwondointernship.data.models.form.CreatePassForm;
@@ -21,6 +22,7 @@ import java.io.InvalidObjectException;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.temporal.WeekFields;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
@@ -93,7 +95,7 @@ public class CreatePassServiceImplementation implements  CreatePassService{
         List<CreatePass> createPassList=convertJsonArrayToList(foundAll);
         return modelMapper.map(createPassList,new TypeToken<List<CreatePassDto>>(){}.getType());
     }
-
+    @Transactional(readOnly = true)
     @Override
     public List<CreatePassDto> findByClassName(String className) {
         if(className==null) throw new IllegalArgumentException("Class Name is null");
@@ -103,11 +105,41 @@ public class CreatePassServiceImplementation implements  CreatePassService{
                 .collect(Collectors.toList());
         return foundByClassName;
     }
-
+    @Transactional(readOnly = true)
     @Override
     public List<CreatePassDto> findByDate(LocalDate date) {
         List<CreatePassDto> found= findAll();
         List<CreatePassDto> foundByDate= found.stream().filter(createPassDto -> createPassDto.getDate().equals(date)).collect(Collectors.toList());
         return foundByDate;
+    }
+
+    @Override
+    public CreatePassDto update(CreatePassForm form, int id) {
+        JSONArray jsonArray= jsonService.getJson(PATH);
+
+       List<CreatePass> createPassList= convertJsonArrayToList(jsonArray);
+        CreatePass found=createPassList.stream().filter(createPass -> createPass.getId()==id).findFirst().orElseThrow(()-> new ResourceNotFoundException("CreatePass is not found by Id"));
+        CreatePass pass= modelMapper.map(form,CreatePass.class);
+
+        found.setClassName(pass.getClassName());
+        found.setDate(pass.getDate());
+        found.setStartTime(pass.getStartTime());
+        found.setDuration(pass.getDuration());
+        found.setExtraPass(pass.isExtraPass());
+        jsonService.saveJson(createPassList,PATH);
+
+        return modelMapper.map(form,CreatePassDto.class);
+    }
+
+
+
+
+    @Transactional
+    @Override
+    public void delete(int id) {
+       JSONArray jsonArray= jsonService.getJson(PATH);
+       List<CreatePass> createPassList= convertJsonArrayToList(jsonArray);
+       createPassList.removeIf(createPass -> createPass.getId()==id);
+       jsonService.saveJson(createPassList,PATH);
     }
 }
