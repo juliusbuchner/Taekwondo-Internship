@@ -127,10 +127,8 @@ public class CreatePassServiceImplementation implements  CreatePassService{
         found.setExtraPass(pass.isExtraPass());
         jsonService.saveJson(createPassList,PATH);
 
-        return modelMapper.map(dto,CreatePassDto.class);
+        return dto;
     }
-
-
 
 
     @Transactional
@@ -140,5 +138,13 @@ public class CreatePassServiceImplementation implements  CreatePassService{
        List<CreatePass> createPassList= convertJsonArrayToList(jsonArray);
        createPassList.removeIf(createPass -> createPass.getId()==id);
        jsonService.saveJson(createPassList,PATH);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public CreatePassDto findById(Integer id){
+        List<CreatePassDto> found= findAll();
+        CreatePassDto foundById= found.stream().filter(createPass -> createPass.getId()==id).findAny().orElseThrow(() -> new ResourceNotFoundException("Create Pass is not found by id"));
+        return foundById;
     }
 }

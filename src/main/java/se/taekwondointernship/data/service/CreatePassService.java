@@ -14,5 +14,6 @@ public interface CreatePassService {
     List<CreatePassDto> findByDate(LocalDate date);
     CreatePassDto update(CreatePassDto dto );
     void delete(int id);
+    CreatePassDto findById(Integer id);
 
 }

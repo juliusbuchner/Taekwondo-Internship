@@ -33,6 +33,12 @@ public class CreatePassController {
         return ResponseEntity.ok(createPassService.update(dto));
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<CreatePassDto> findById(@PathVariable("id") Integer id){
+        return ResponseEntity.ok(createPassService.findById(id));
+    }
+
+
     @GetMapping()
     public ResponseEntity<List<CreatePassDto>> findAll(){
         return ResponseEntity.ok(createPassService.findAll());
