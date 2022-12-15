@@ -114,12 +114,12 @@ public class CreatePassServiceImplementation implements  CreatePassService{
     }
 
     @Override
-    public CreatePassDto update(CreatePassForm form, int id) {
+    public CreatePassDto update(CreatePassDto dto) {
         JSONArray jsonArray= jsonService.getJson(PATH);
 
        List<CreatePass> createPassList= convertJsonArrayToList(jsonArray);
-        CreatePass found=createPassList.stream().filter(createPass -> createPass.getId()==id).findFirst().orElseThrow(()-> new ResourceNotFoundException("CreatePass is not found by Id"));
-        CreatePass pass= modelMapper.map(form,CreatePass.class);
+        CreatePass found=createPassList.stream().filter(createPass -> createPass.getId()==dto.getId()).findFirst().orElseThrow(()-> new ResourceNotFoundException("CreatePass is not found by Id"));
+        CreatePass pass= modelMapper.map(dto,CreatePass.class);
 
         found.setClassName(pass.getClassName());
         found.setDate(pass.getDate());
@@ -128,7 +128,7 @@ public class CreatePassServiceImplementation implements  CreatePassService{
         found.setExtraPass(pass.isExtraPass());
         jsonService.saveJson(createPassList,PATH);
 
-        return modelMapper.map(form,CreatePassDto.class);
+        return modelMapper.map(dto,CreatePassDto.class);
     }
 
 

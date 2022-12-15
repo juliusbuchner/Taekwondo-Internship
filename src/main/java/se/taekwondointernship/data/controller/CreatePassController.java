@@ -28,9 +28,9 @@ public class CreatePassController {
         return ResponseEntity.status(HttpStatus.CREATED).body(createPassService.create(createPassForm));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<CreatePassDto> update(@PathVariable("id") Integer id, @RequestBody CreatePassForm form){
-        return ResponseEntity.ok(createPassService.update(form,id));
+    @PutMapping()
+    public ResponseEntity<CreatePassDto> update(@RequestBody CreatePassDto dto){
+        return ResponseEntity.ok(createPassService.update(dto));
     }
 
     @GetMapping()

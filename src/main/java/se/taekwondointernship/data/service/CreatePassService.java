@@ -12,7 +12,7 @@ public interface CreatePassService {
     List<CreatePassDto> findAll();
     List<CreatePassDto> findByClassName(String className);
     List<CreatePassDto> findByDate(LocalDate date);
-    CreatePassDto update(CreatePassForm form ,int id);
+    CreatePassDto update(CreatePassDto dto );
     void delete(int id);
 
 }
