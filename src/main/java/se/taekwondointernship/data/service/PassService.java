@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.util.List;
 
 public interface PassService {
-        PassDto create(PassForm form);
+        boolean create(PassForm form);
         List<PassDto> findAll() throws IOException;
         PassDto findByName(String firstName, String lastName);
         List<PassDto> findAllByClassName(String className);

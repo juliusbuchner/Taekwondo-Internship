@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import se.taekwondointernship.data.models.dto.PassDto;
+import se.taekwondointernship.data.models.entity.Message;
 import se.taekwondointernship.data.models.form.PassForm;
 import se.taekwondointernship.data.service.PassService;
 
@@ -24,10 +25,17 @@ public class PassController {
         this.passService = passService;
     }
 
-   // @PostMapping(path = "/participant", consumes = "application/json", produces = "application/json" )
+  //  @RequestMapping(path = "/participant", consumes = "application/json", produces = "application/json" )
    @PostMapping("/participant")
-   public ResponseEntity<PassDto> createPass(@RequestBody PassForm passForm){
-        return ResponseEntity.status(HttpStatus.CREATED).body(passService.create(passForm));
+   public ResponseEntity<Message> createPass(@RequestBody PassForm passForm){
+        boolean result= passService.create(passForm);
+        Message message=null;
+        if(result==true){
+             message=new Message(1, "Sign-in is Success");
+        }else{
+             message=new Message(2,"Error with sign-in, Please contact admin");
+        }
+        return ResponseEntity.status(HttpStatus.CREATED).body(message);
        }
 
    /* @PostMapping("/participant")

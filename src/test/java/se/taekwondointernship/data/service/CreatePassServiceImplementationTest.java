@@ -38,7 +38,6 @@ class CreatePassServiceImplementationTest {
     ObjectMapper objectMapper=new ObjectMapper();
     @Autowired
     CreatePassService createPassService;
-
     CreatePassForm form=new CreatePassForm("TestClass", LocalDate.parse("2022-12-18"), LocalTime.parse("15:30"),60,false);
     CreatePassForm form2=new CreatePassForm("TestClass2", null, LocalTime.parse("15:30"),60,true);
 

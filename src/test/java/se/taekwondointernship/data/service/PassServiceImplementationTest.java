@@ -12,13 +12,16 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.transaction.annotation.Transactional;
 import se.taekwondointernship.data.models.dto.PassDto;
+import se.taekwondointernship.data.models.entity.CreatePass;
 import se.taekwondointernship.data.models.entity.Pass;
+import se.taekwondointernship.data.models.entity.Person;
 import se.taekwondointernship.data.models.form.PassForm;
 import se.taekwondointernship.data.repository.PassRepository;
 
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -41,61 +44,61 @@ class PassServiceImplementationTest {
     ModelMapper modelMapper=new ModelMapper();
     @Autowired
     ObjectMapper objectMapper=new ObjectMapper();
-
-
-        @Autowired
-        PassServiceImplementation passServiceImplementation;
+    @Autowired
+    PassServiceImplementation passServiceImplementation;
    //PassServiceImplementation passServiceImplementation=new PassServiceImplementation(modelMapper,objectMapper,passRepository);
 
     void setUp(){
 
     }
-  //  Pass partcipant1=new Pass("Dummy","Dummy","Dummy","Dummy","Dummy", LocalDate.now(),"Dummy");
-    PassForm partcipant2=new PassForm("Test","Testson","0002222","Tester","test", LocalDate.now(),"30");
+      Person person= new Person(1,"Test","Testsson", "123456789","Testare Testsson","987654321","test.testsson@mail.com","900101-0000","32",true,0,false);
+      CreatePass pass = new CreatePass(1,"class10",LocalDate.parse("2023-01-30"), LocalTime.parse("15:30"),45,false);
+      PassForm partcipant1 =new PassForm(1,1,1,LocalDate.now());
+
+
 
 
     @Test
-    void create() throws IOException {
-     //  Pass pass= passRepository.save(partcipant1);
+    void createFromService() throws IOException {
 
-      //  assertTrue(!f.exists());
-
-        PassDto testPart1;
-       testPart1 = passServiceImplementation.create(partcipant2);
+        Boolean testPart1;
+       testPart1 = passServiceImplementation.create(partcipant1);
        testEntityManager.flush();
-      // assertEquals("Anusha",testPart1.getFirstName());
-       // File f=new File("C:\\JSON\\Week48_2022\\pass_2022-12-01");
-        //assertTrue(f.exists());
-       // PassDto found=passServiceImplementation.findByName("Dummy","Dummy");
         List<PassDto> found= passServiceImplementation.findAll();
         assertEquals(1,found.size());
        PassDto foundParticipant =found.get(0);
 
-        assertEquals(partcipant2.getFirstName(),foundParticipant.getFirstName());
-        assertEquals(partcipant2.getLastName(),foundParticipant.getLastName());
-        assertEquals(partcipant2.getParentPhoneNumber(),foundParticipant.getParentPhoneNumber());
-        assertEquals(partcipant2.getParentName(),foundParticipant.getParentName());
-        assertEquals(partcipant2.getClassName(),foundParticipant.getClassName());
-        assertEquals(partcipant2.getAge(),foundParticipant.getAge());
-        assertEquals(partcipant2.getDate(),foundParticipant.getDate());
+        assertEquals(person.getFirstName(),foundParticipant.getFirstName());
+        assertEquals(person.getLastName(),foundParticipant.getLastName());
+        assertEquals(person.getParentNumber(),foundParticipant.getParentPhoneNumber());
+        assertEquals(person.getParentName(),foundParticipant.getParentName());
+        assertEquals(pass.getClassName(),foundParticipant.getClassName());
+        assertEquals(person.getAge(),foundParticipant.getAge());
+        assertEquals(partcipant1.getDate(),foundParticipant.getDate());
+        assertTrue(testPart1);
     }
 
+
     @Test
-    void findAll() {
+    void findAll() throws Exception {
+        List<PassDto> found= passServiceImplementation.findAll();
+
+        assertEquals(1,found.size());
+
     }
 
     @Test
     void findByName() {
 
-        PassDto foundByName=passServiceImplementation.findByName(partcipant2.getFirstName(), partcipant2.getLastName());
+        PassDto foundByName=passServiceImplementation.findByName(person.getFirstName(), person.getLastName());
 
-        assertEquals(partcipant2.getFirstName(),foundByName.getFirstName());
-        assertEquals(partcipant2.getLastName(),foundByName.getLastName());
-        assertEquals(partcipant2.getParentPhoneNumber(),foundByName.getParentPhoneNumber());
-        assertEquals(partcipant2.getParentName(),foundByName.getParentName());
-        assertEquals(partcipant2.getClassName(),foundByName.getClassName());
-        assertEquals(partcipant2.getAge(),foundByName.getAge());
-        assertEquals(partcipant2.getDate(),foundByName.getDate());
+        assertEquals(person.getFirstName(),foundByName.getFirstName());
+        assertEquals(person.getLastName(),foundByName.getLastName());
+        assertEquals(person.getParentNumber(),foundByName.getParentPhoneNumber());
+        assertEquals(person.getParentName(),foundByName.getParentName());
+        assertEquals(pass.getClassName(),foundByName.getClassName());
+        assertEquals(person.getAge(),foundByName.getAge());
+        assertEquals(partcipant1.getDate(),foundByName.getDate());
 
 
 
@@ -103,21 +106,22 @@ class PassServiceImplementationTest {
 
     @Test
     void findAllByClassName() {
-        List<PassDto> found=passServiceImplementation.findAllByClassName(partcipant2.getClassName());
+        List<PassDto> found=passServiceImplementation.findAllByClassName(pass.getClassName());
         assertEquals(1,found.size());
 
     }
 
     @Test
     void findByNameAndClassName() {
-        PassDto found=passServiceImplementation.findByNameAndClassName(partcipant2.getFirstName(), partcipant2.getLastName(),partcipant2.getClassName());
-        assertEquals(partcipant2.getFirstName(),found.getFirstName());
-        assertEquals(found.getLastName(),partcipant2.getLastName());
-        assertEquals(found.getParentPhoneNumber(),partcipant2.getParentPhoneNumber());
-        assertEquals(found.getParentName(),partcipant2.getParentName());
-        assertEquals(found.getClassName(),partcipant2.getClassName());
-        assertEquals(found.getAge(),partcipant2.getAge());
-        assertEquals(found.getDate(),partcipant2.getDate());
+        PassDto found=passServiceImplementation.findByNameAndClassName(person.getFirstName(), person.getLastName(),pass.getClassName());
+        assertEquals(person.getFirstName(),found.getFirstName());
+        assertEquals(found.getLastName(),person.getLastName());
+        assertEquals(found.getParentPhoneNumber(),person.getParentNumber());
+        assertEquals(found.getParentName(),person.getParentName());
+        assertEquals(found.getClassName(),pass.getClassName());
+        assertEquals(found.getAge(),person.getAge());
+        assertEquals(found.getDate(),partcipant1.getDate());
+
 
     }
 }

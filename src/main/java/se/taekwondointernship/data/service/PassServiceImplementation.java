@@ -17,6 +17,7 @@ import se.taekwondointernship.data.models.dto.PersonSmallDto;
 import se.taekwondointernship.data.models.entity.CreatePass;
 import se.taekwondointernship.data.models.entity.Pass;
 import se.taekwondointernship.data.models.entity.Person;
+import se.taekwondointernship.data.models.form.MessageForm;
 import se.taekwondointernship.data.models.form.PassForm;
 import se.taekwondointernship.data.repository.PassRepository;
 
@@ -58,7 +59,7 @@ public class PassServiceImplementation implements PassService {
     boolean mkdir=f.mkdir();
     final String PATH =directoryName+"\\"+fileName;
     final String personPATH="C:\\JSON\\PersonList.json";
-    final String createPassPATH="C:\\JSON\\"+date.getMonth()+"_"+date.getYear()+"\\created_pass.json";
+    final String createPassPATH="C:\\JSON\\"+date.getYear()+"\\created_pass.json";
 
 
 
@@ -122,52 +123,47 @@ public class PassServiceImplementation implements PassService {
     //Store values into Json
     @Override
     @Transactional
-    public PassDto create(PassForm form) {
+    public boolean create(PassForm form) {
 
         //fetching the specific person
           List<Person> list= readPersonFile(personPATH);
           Person foundPerson = list.stream().filter(person -> person.getPersonId()== form.getPersonId()).findAny().orElseThrow(()->new ResourceNotFoundException("Person not found"));
-
+        //fetching specific class
           List<CreatePassDto> createPassList= readCreatePassFile(createPassPATH);
           CreatePassDto foundCreatePass= createPassList.stream().filter(createPass -> createPass.getId()==form.getCreatePassId()).findAny().orElseThrow(()-> new ResourceNotFoundException("Class not found"));
 
-          if(foundPerson.getPassCount()==3){
-              foundPerson.setLocked(true);
-              System.out.println("You can't sign-in, Please contact Admin");
-              jsonService.saveJson(list,personPATH);
-              return null;
+           if((foundPerson.getPassCount()<3) || (foundPerson.getPassCount()>=3 && foundPerson.isLocked()==false)) {
+              Pass pass = passRepository.save(modelMapper.map(form, Pass.class));
+              System.out.println(pass);
+              jsonArray = jsonService.getJson(PATH);
 
-          }
-            if(foundPerson.getPassCount()<3 || (foundPerson.getPassCount()>=3 && foundPerson.isLocked()==false)){
-            Pass pass= passRepository.save(modelMapper.map(form,Pass.class));
-           System.out.println(pass);
-          jsonArray= jsonService.getJson(PATH);
+              jsonObject.put("id", pass.getPassId());
+              jsonObject.put("personId", foundPerson.getPersonId());
+              jsonObject.put("firstName", foundPerson.getFirstName());
+              jsonObject.put("lastName", foundPerson.getLastName());
+              jsonObject.put("parentName", foundPerson.getParentName());
+              jsonObject.put("parentPhoneNumber", foundPerson.getParentNumber());
+              jsonObject.put("className", foundCreatePass.getClassName());
+              //  jsonObject.put("date",pass.getDate().toString());
+              jsonObject.put("age", foundPerson.getAge());
+              //passList.put("passList",jsonObject);
+              jsonArray.add(jsonObject);
 
-            jsonObject.put("id",pass.getPassId());
-            jsonObject.put("personId",foundPerson.getPersonId());
-            jsonObject.put("firstName", foundPerson.getFirstName());
-            jsonObject.put("lastName", foundPerson.getLastName());
-            jsonObject.put("parentName", foundPerson.getParentName());
-            jsonObject.put("parentPhoneNumber", foundPerson.getPhoneNumber());
-            jsonObject.put("className", foundCreatePass.getClassName());
-          //  jsonObject.put("date",pass.getDate().toString());
-            jsonObject.put("age",foundPerson.getAge());
-            //passList.put("passList",jsonObject);
-            jsonArray.add(jsonObject);
+              jsonService.saveJson(jsonArray, PATH);
+              Pass saved = modelMapper.map(jsonService.getJson(PATH), Pass.class);
+              // increement the passcount
+              foundPerson.setPassCount(foundPerson.getPassCount() + 1);
+              jsonService.saveJson(list, personPATH);
+              return true;
+          } else if(foundPerson.getPassCount()==3){
+               foundPerson.setLocked(true);
+               System.out.println("You can't sign-in, Please contact Admin");
+               jsonService.saveJson(list,personPATH);
+               return false;
 
-         jsonService.saveJson(jsonArray, PATH);
-            Pass saved=  modelMapper.map(jsonService.getJson(PATH), Pass.class);
-            // increement the passcount
-                foundPerson.setPassCount(foundPerson.getPassCount()+1);
-                jsonService.saveJson(list,personPATH);
+           }
 
-            }else{
-                System.out.println("Please contact admin");
-                return null;
-            }
-            //Updating into the person file
-
-        return modelMapper.map(jsonObject,PassDto.class);
+        return false;
           }
 
     @Transactional
