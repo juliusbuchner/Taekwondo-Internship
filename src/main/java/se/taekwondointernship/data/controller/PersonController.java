@@ -33,4 +33,8 @@ public class PersonController {
         personService.delete(id);
         return ResponseEntity.noContent().build();
     }
+    @GetMapping("/{id}")
+    public ResponseEntity<PersonDto> findById(@PathVariable Integer id){
+        return ResponseEntity.ok(personService.findById(id));
+    }
 }

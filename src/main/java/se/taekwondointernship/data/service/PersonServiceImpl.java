@@ -17,6 +17,7 @@ import java.time.LocalDate;
 import java.time.Period;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -24,12 +25,16 @@ import org.json.simple.JSONObject;
 @Service
 public class PersonServiceImpl implements PersonService{
     PersonRepository personRepository;
+    EmailServiceImpl emailService;
+    MessageServiceImpl messageService;
     ModelMapper modelMapper;
     JSONParser jsonParser = new JSONParser();
-
     JSONArray memberList = new JSONArray();
-    public PersonServiceImpl(PersonRepository personRepository, ModelMapper modelMapper){
+    public PersonServiceImpl(PersonRepository personRepository, EmailServiceImpl emailService,
+                             MessageServiceImpl messageService, ModelMapper modelMapper){
         this.personRepository = personRepository;
+        this.emailService = emailService;
+        this.messageService = messageService;
         this.modelMapper = modelMapper;
     }
     @Override
@@ -37,6 +42,7 @@ public class PersonServiceImpl implements PersonService{
     public PersonDto create(PersonForm form) {
         Person person = personRepository.save(modelMapper.map(form, Person.class));
         memberList.add(parsePerson(person));
+        emailService.sending(person.getEmail());
         printJSON(memberList);
         return modelMapper.map(person, PersonDto.class);
     }
@@ -75,20 +81,41 @@ public class PersonServiceImpl implements PersonService{
         }
     }
 
+    @Override
+    @Transactional
+    public PersonDto findById(Integer id) {
+        List<Person> personList = new ArrayList<>();
+        Person person = new Person();
+        try (FileReader reader = new FileReader("members.json")) {
+            Object obj = jsonParser.parse(reader);
+            JSONArray membersList = (JSONArray) obj;
+            membersList.forEach(mbr -> personList.add(parseJsonPerson((JSONObject) mbr)));
+            for (Person value : personList) {
+                if (Objects.equals(value.getPersonId(), id)) {
+                    person = value;
+                }
+            }
+        } catch (IOException | ParseException e){
+            e.printStackTrace();
+        }
+        return modelMapper.map(person, PersonDto.class);
+    }
+
 
     private Person parseJsonPerson(JSONObject objectPerson){
-        JSONObject jsonPerson = (JSONObject) objectPerson.get("participant");
-        Integer personId = Integer.parseInt(String.valueOf(jsonPerson.get("personId")));
-        String firstName = (String) jsonPerson.get("firstName");
-        String lastName = (String) jsonPerson.get("lastName");
-        String phoneNumber = (String) jsonPerson.get("phoneNumber");
-        String email = (String) jsonPerson.get("email");
-        String socialSecurityNumber = (String) jsonPerson.get("socialSecurityNumber");
-        String age = (String) jsonPerson.get("age");
-        String parentName = (String) jsonPerson.get("parentName");
-        String parentNumber = (String) jsonPerson.get("parentNumber");
-        boolean permissionPhoto = Boolean.parseBoolean(String.valueOf(jsonPerson.get("permissionPhoto")));
-        return new Person(personId, firstName, lastName, phoneNumber, parentName, parentNumber, email, socialSecurityNumber,age, permissionPhoto);
+        Integer personId = Integer.parseInt(String.valueOf(objectPerson.get("personId")));
+        String firstName = (String) objectPerson.get("firstName");
+        String lastName = (String) objectPerson.get("lastName");
+        String phoneNumber = (String) objectPerson.get("phoneNumber");
+        String email = (String) objectPerson.get("email");
+        String socialSecurityNumber = (String) objectPerson.get("socialSecurityNumber");
+        String age = (String) objectPerson.get("age");
+        String parentName = (String) objectPerson.get("parentName");
+        String parentNumber = (String) objectPerson.get("parentNumber");
+        boolean permissionPhoto = Boolean.parseBoolean(String.valueOf(objectPerson.get("permissionPhoto")));
+        Integer passCount = Integer.parseInt(String.valueOf(objectPerson.get("passCount")));
+        boolean locked = Boolean.parseBoolean(String.valueOf(objectPerson.get("locked")));
+        return new Person(personId, firstName, lastName, phoneNumber, parentName, parentNumber, email, socialSecurityNumber,age, permissionPhoto, passCount, locked);
     }
     private JSONObject parsePerson(Person person){
         JSONObject jsonPersonDetails = new JSONObject();
@@ -103,9 +130,9 @@ public class PersonServiceImpl implements PersonService{
         jsonPersonDetails.put("parentName", person.getParentName());
         jsonPersonDetails.put("parentNumber", person.getParentNumber());
         jsonPersonDetails.put("permissionPhoto", person.isPermissionPhoto());
-        JSONObject jsonPerson = new JSONObject();
-        jsonPerson.put("participant", jsonPersonDetails);
-        return jsonPerson;
+        jsonPersonDetails.put("passCount", person.getPassCount());
+        jsonPersonDetails.put("locked", person.isLocked());
+        return jsonPersonDetails;
     }
     private void printJSON(JSONArray jsonArray){
         try (FileWriter file = new FileWriter("members.json")){

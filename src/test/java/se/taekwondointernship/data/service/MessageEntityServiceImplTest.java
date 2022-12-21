@@ -4,16 +4,16 @@ import org.json.JSONException;
 import org.json.simple.JSONObject;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
-import se.taekwondointernship.data.models.entity.Message;
-class MessageServiceImplTest {
+import se.taekwondointernship.data.models.entity.MessageEntity;
+class MessageEntityServiceImplTest {
 
     @Test
     void create() {
         try {
-            final Message message = new Message(1, "Alla barn sover.");
+            final MessageEntity messageEntity = new MessageEntity(1, "Alla barn sover.");
             JSONObject jsonMessage = new JSONObject();
-            jsonMessage.put("messageId", message.getMessageId());
-            jsonMessage.put("messageContent", message.getMessageContent());
+            jsonMessage.put("messageId", messageEntity.getMessageId());
+            jsonMessage.put("messageContent", messageEntity.getMessageContent());
             JSONAssert.assertEquals("{messageId:1}", String.valueOf(jsonMessage), false);
             JSONAssert.assertEquals("{messageContent:\"Alla barn sover.\"}", String.valueOf(jsonMessage), false);
             JSONAssert.assertEquals("{messageId:1, messageContent:\"Alla barn sover.\"}", String.valueOf(jsonMessage), true);
@@ -25,16 +25,16 @@ class MessageServiceImplTest {
     @Test
     void edit() {
         try {
-            final Message messageStart = new Message(1, "Nu ska alla sova.");
+            final MessageEntity messageEntityStart = new MessageEntity(1, "Nu ska alla sova.");
             JSONObject jsonMessage = new JSONObject();
-            jsonMessage.put("messageId", messageStart.getMessageId());
-            jsonMessage.put("messageContent", messageStart.getMessageContent());
+            jsonMessage.put("messageId", messageEntityStart.getMessageId());
+            jsonMessage.put("messageContent", messageEntityStart.getMessageContent());
             JSONAssert.assertEquals("{messageId:1}", String.valueOf(jsonMessage), false);
             JSONAssert.assertEquals("{messageContent:\"Nu ska alla sova.\"}", String.valueOf(jsonMessage), false);
             JSONAssert.assertEquals("{messageId:1, messageContent:\"Nu ska alla sova.\"}", String.valueOf(jsonMessage), true);
 
-            final Message messageEnd = new Message(1, "Alla barn sover.");
-            jsonMessage.replace("messageContent", messageEnd.getMessageContent());
+            final MessageEntity messageEntityEnd = new MessageEntity(1, "Alla barn sover.");
+            jsonMessage.replace("messageContent", messageEntityEnd.getMessageContent());
             JSONAssert.assertEquals("{messageId:1}", String.valueOf(jsonMessage), false);
             JSONAssert.assertEquals("{messageContent:\"Alla barn sover.\"}", String.valueOf(jsonMessage), false);
             JSONAssert.assertEquals("{messageId:1, messageContent:\"Alla barn sover.\"}", String.valueOf(jsonMessage), true);

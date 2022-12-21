@@ -55,10 +55,8 @@ public class AdminServiceImpl implements AdminService{
         jsonAdminDetails.put("id", admin.getId());
         jsonAdminDetails.put("username", admin.getUsername());
         jsonAdminDetails.put("password", admin.getPassword());
-        JSONObject jsonAdmin = new JSONObject();
-        jsonAdmin.put("admin", jsonAdminDetails);
         try (FileWriter file = new FileWriter("admin.json")) {
-            file.write(jsonAdmin.toJSONString());
+            file.write(jsonAdminDetails.toJSONString());
             file.flush();
         } catch (IOException e){
             e.printStackTrace();
@@ -120,10 +118,9 @@ public class AdminServiceImpl implements AdminService{
     }
 
     private Admin parseJsonAdmin(JSONObject objectAdmin) {
-        JSONObject jsonAdmin = (JSONObject) objectAdmin.get("admin");
-        Integer id = Integer.parseInt(String.valueOf(jsonAdmin.get("id")));
-        String username = (String) jsonAdmin.get("username");
-        String password = (String) jsonAdmin.get("password");
+        Integer id = Integer.parseInt(String.valueOf(objectAdmin.get("id")));
+        String username = (String) objectAdmin.get("username");
+        String password = (String) objectAdmin.get("password");
         return new Admin(id, username, password);
     }
 }
