@@ -132,7 +132,7 @@ public class PassServiceImplementation implements PassService {
           List<CreatePassDto> createPassList= readCreatePassFile(createPassPATH);
           CreatePassDto foundCreatePass= createPassList.stream().filter(createPass -> createPass.getId()==form.getCreatePassId()).findAny().orElseThrow(()-> new ResourceNotFoundException("Class not found"));
 
-           if((foundPerson.getPassCount()<3) || (foundPerson.getPassCount()>=3 && foundPerson.isLocked()==false)) {
+           if((foundPerson.getPassCount()<3 && foundPerson.isLocked()==false) || (foundPerson.getPassCount()>=3 && foundPerson.isLocked()==false)) {
               Pass pass = passRepository.save(modelMapper.map(form, Pass.class));
               System.out.println(pass);
               jsonArray = jsonService.getJson(PATH);
@@ -191,7 +191,7 @@ public class PassServiceImplementation implements PassService {
     }
 
 
-@Transactional(readOnly = true)
+    @Transactional(readOnly = true)
     @Override
     public PassDto findByName(String firstName, String lastName) {
         if(firstName==null) throw new IllegalArgumentException("First Name is null");
@@ -241,5 +241,7 @@ public class PassServiceImplementation implements PassService {
                 .findFirst().orElseThrow(()->new ResourceNotFoundException("Cannot find by FirstName, Last Name and ClassName"));
                 return foundByNameAndClassName;
     }
+
+
 
 }

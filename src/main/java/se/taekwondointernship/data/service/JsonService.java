@@ -22,13 +22,6 @@ import java.util.Locale;
 
 public class JsonService {
     private ObjectMapper objectMapper;
-
-   /* @Autowired
-    public JsonService(ObjectMapper objectMapper) {
-        this.objectMapper = objectMapper;
-    }*/
-
-
     public JsonService() {
         SimpleDateFormat sdf=new SimpleDateFormat("dd-MM-yyyy");
         DateTimeFormatter dtf=  DateTimeFormatter.ofPattern("HH:mm");
@@ -42,8 +35,6 @@ public class JsonService {
     public void saveJson(Object object, String PATH){
         //Get data
         //Write into JSON file
-
-       // System.out.println(weekOfYear);
 
         try {
 
@@ -66,15 +57,5 @@ public class JsonService {
         }
     }
 
- /*   public JSONObject getJson(){
-        try {
-            return objectMapper.readValue(new File(PATH), JSONArray.class);
-        } catch (FileNotFoundException e){
-            return new JSONArray();
-        }
-        catch (IOException e) {
-            return new JSONArray();
-        }
-    }*/
 
 }

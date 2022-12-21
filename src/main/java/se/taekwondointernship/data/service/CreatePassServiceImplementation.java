@@ -127,7 +127,7 @@ public class CreatePassServiceImplementation implements  CreatePassService{
         found.setExtraPass(pass.isExtraPass());
         jsonService.saveJson(createPassList,PATH);
 
-        return dto;
+        return modelMapper.map(found,CreatePassDto.class);
     }
 
 

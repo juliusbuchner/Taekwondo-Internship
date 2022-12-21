@@ -2,6 +2,8 @@ package se.taekwondointernship.data.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import se.taekwondointernship.data.models.dto.PassDto;
+import se.taekwondointernship.data.models.dto.PersonDto;
+import se.taekwondointernship.data.models.entity.Person;
 import se.taekwondointernship.data.models.form.PassForm;
 
 import java.io.IOException;
