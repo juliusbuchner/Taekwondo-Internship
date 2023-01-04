@@ -115,6 +115,7 @@ public class EmailServiceImpl implements EmailService{
         }
     }
 
+    @SuppressWarnings("unchecked")
     private JSONObject extractEmailInfo(Email email) {
         JSONObject jsonEmailDetails = new JSONObject();
         jsonEmailDetails.put("id", email.getId());
@@ -144,8 +145,19 @@ public class EmailServiceImpl implements EmailService{
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public String getEmail(){
+        try {
+            List<Email> listOdEmailInfo = getFromExistingEmailJSON();
+            return listOdEmailInfo.get(0).getSender();
+        }catch (IOException | ParseException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
     @Transactional
-    public void sending(String recipient) {
+    public void sendAttach(String recipient) {
         try {
             Email email = getFromExistingEmailJSON().get(0);
             String a = getFromExistingEmailJSON().get(0).getSenderName();
@@ -182,6 +194,41 @@ public class EmailServiceImpl implements EmailService{
         }
     }
 
+    @Override
+    @Transactional
+    public void sendLink(String recipient){
+        try {
+            Email email = getFromExistingEmailJSON().get(0);
+            String a = getFromExistingEmailJSON().get(0).getSenderName();
+            String b = getFromExistingEmailJSON().get(0).getPassword();
+            System.out.println(a);
+            System.out.println(b);
+
+            MimeMessage msg = new MimeMessage(setUpSession());
+            msg.addHeader("Content-type", "text/HTML; charset=UTF-8");
+            msg.addHeader("format", "flowed");
+            msg.addHeader("Content-Transfer-Encoding", "8bit");
+            msg.setFrom(new InternetAddress(email.getSender(), email.getSenderName()));
+            msg.setReplyTo(InternetAddress.parse(email.getSender(), false));
+            msg.setSubject("Återställning av lösenord", "UTF-8");
+            msg.setSentDate(new Date());
+
+            msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(recipient, false));
+            MimeBodyPart linkBodyPart = new MimeBodyPart();
+            String url = "http://localhost:8080/admin/reset";
+            String link = "<a href='"+url+"'>"+url+"</a>";
+            String message = "För att återställa lösenordet, tryck på länken som följt med mailet.\n";
+            linkBodyPart.setText(message+"\n"+link, "utf-8", "html");
+            Multipart multipart = new MimeMultipart();
+            multipart.addBodyPart(linkBodyPart);
+            msg.setContent(multipart);
+            Transport.send(msg);
+            System.out.println("Email sent successfully with link!");
+        } catch (MessagingException | IOException | ParseException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private Session setUpSession() {
         try {
             Email email = getFromExistingEmailJSON().get(0);
@@ -212,6 +259,7 @@ public class EmailServiceImpl implements EmailService{
         }
     }
 
+    @SuppressWarnings("unchecked")
     private List<Email> getFromExistingEmailJSON() throws IOException, ParseException {
         List<Email> listOfEmailInfo = new ArrayList<>();
         JSONParser jsonParser = new JSONParser();

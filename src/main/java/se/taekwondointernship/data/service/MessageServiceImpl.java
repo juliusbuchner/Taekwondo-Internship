@@ -44,6 +44,17 @@ public class MessageServiceImpl implements MessageService{
         return extractMessage(messageEntity, url);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public MessageDto findMessage(String url) {
+        try {
+            return modelMapper.map(getFromExistingMessageJSON(url).get(0), MessageDto.class);
+        } catch (IOException | ParseException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
     private MessageDto extractMessage(MessageEntity messageEntity, String url){
         JSONObject jsonMessageDetails = new JSONObject();
         jsonMessageDetails.put("messageId", messageEntity.getMessageId());
@@ -57,14 +68,7 @@ public class MessageServiceImpl implements MessageService{
         return modelMapper.map(messageEntity, MessageDto.class);
     }
 
-    public MessageDto findMessage(String url) {
-        try {
-            return modelMapper.map(getFromExistingMessageJSON(url).get(0), MessageDto.class);
-        } catch (IOException | ParseException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
+    @SuppressWarnings("unchecked")
     private List<MessageEntity> getFromExistingMessageJSON(String url) throws IOException, ParseException {
         List<MessageEntity> messageEntityList = new ArrayList<>();
         JSONParser jsonParser = new JSONParser();

@@ -11,8 +11,12 @@ public interface EmailService {
     EmailDto editPassword(String password);
     EmailDto editSenderName(String name);
     EmailDto editSubject(String subject);
-    void sending(String recipient);
 
+    @Transactional(readOnly = true)
+    String getEmail();
+
+    void sendAttach(String recipient);
+    void sendLink(String recipient);
     @Transactional
     EmailDto editAttachURL(String attachURL);
 

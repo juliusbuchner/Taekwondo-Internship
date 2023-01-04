@@ -16,7 +16,9 @@ public class EmailForm {
     private String sender;
     @NotBlank(message = "Lösenordet kan inte vara tomt.")
     private String password;
+    @NotBlank(message = "Sändarnamnet kan inte vara tomt.")
     private String senderName;
+    @NotBlank(message = "Ett mail måste ha ett namn.")
     private String subject;
     private String attachURL;
 }

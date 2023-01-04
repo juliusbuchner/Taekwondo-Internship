@@ -9,6 +9,8 @@ import javax.validation.constraints.NotBlank;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AdminForm {
+    @NotBlank(message = "Användarnamnet kan inte vara tomt.")
     private String username;
+    @NotBlank(message = "Lösenordet kan inte vara tomt.")
     private String password;
 }

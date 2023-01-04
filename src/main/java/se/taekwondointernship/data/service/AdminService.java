@@ -18,4 +18,6 @@ public interface AdminService {
     AdminDto logIn();
 
     AdminDto logOut();
+
+    String sendReset(String username);
 }

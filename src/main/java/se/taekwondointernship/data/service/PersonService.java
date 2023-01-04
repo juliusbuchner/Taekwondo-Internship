@@ -10,4 +10,5 @@ public interface PersonService {
     List<PersonDto> findAll();
     void delete(Integer id);
     PersonDto findById(Integer id);
+    PersonDto unlock(Integer id);
 }

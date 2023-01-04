@@ -27,14 +27,18 @@ public class PersonController {
     public ResponseEntity<List<PersonDto>> findAll(){
         return ResponseEntity.ok(personService.findAll());
     }
-    @DeleteMapping("/{id}")
+    @DeleteMapping(path = "/{id}")
     public ResponseEntity<String> delete(@PathVariable Integer id){
         System.out.println("### Deleting Method ###");
         personService.delete(id);
         return ResponseEntity.noContent().build();
     }
-    @GetMapping("/{id}")
+    @GetMapping(path = "/{id}")
     public ResponseEntity<PersonDto> findById(@PathVariable Integer id){
         return ResponseEntity.ok(personService.findById(id));
+    }
+    @PutMapping(path = "/{id}")
+    public ResponseEntity<PersonDto> unlockById(@PathVariable Integer id){
+        return ResponseEntity.ok(personService.unlock(id));
     }
 }

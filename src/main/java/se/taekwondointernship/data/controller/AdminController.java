@@ -24,7 +24,7 @@ public class AdminController {
         System.out.println("### In Create Method ###");
         return ResponseEntity.status(HttpStatus.CREATED).body(adminService.create(form));
     }
-    @PutMapping("/{oldPassword}")
+    @PutMapping("/edit/{oldPassword}")
     public ResponseEntity<?> edit(@RequestBody AdminForm form, @PathVariable String oldPassword){
         if (oldPassword.equals(adminService.getPassword())){
             try {
@@ -48,5 +48,23 @@ public class AdminController {
     @PutMapping("/logout")
     public ResponseEntity<?> logOut(){
         return ResponseEntity.ok(adminService.logOut());
+    }
+
+    @GetMapping("/sendreset/{username}")
+    public ResponseEntity<?> sendReset(@PathVariable String username){
+        return ResponseEntity.ok(adminService.sendReset(username));
+    }
+
+    @PutMapping("/reset/{username}")
+    public ResponseEntity<?> reset(@RequestBody String newPassword, @PathVariable String username){
+            try {
+                if (adminService.getUsername().equals(username)) {
+                    AdminForm form = new AdminForm(adminService.getUsername(), newPassword);
+                    return ResponseEntity.ok(adminService.editPassword(form));
+                } else return ResponseEntity.status(403).body("Användarnamnet är fel. Om du " +
+                        "inte är behörig, var god och låt bli admin.");
+            } catch (IOException | ParseException e) {
+                throw new RuntimeException(e);
+            }
     }
 }

@@ -22,8 +22,10 @@ import java.util.List;
 public class AdminServiceImpl implements AdminService{
     AdminRepository repository;
     ModelMapper modelMapper;
-    public AdminServiceImpl(AdminRepository repository, ModelMapper modelMapper){
+    EmailServiceImpl emailService;
+    public AdminServiceImpl(AdminRepository repository, EmailServiceImpl emailService, ModelMapper modelMapper){
         this.repository = repository;
+        this.emailService = emailService;
         this.modelMapper = modelMapper;
     }
 
@@ -50,6 +52,7 @@ public class AdminServiceImpl implements AdminService{
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void extractAdmin(Admin admin) {
         JSONObject jsonAdminDetails = new JSONObject();
         jsonAdminDetails.put("id", admin.getId());
@@ -83,6 +86,8 @@ public class AdminServiceImpl implements AdminService{
         }
     }
 
+    @Override
+    @Transactional
     public AdminDto logIn(){
         try {
             List<Admin> adminList = getFromExistingAdminJSON();
@@ -94,6 +99,8 @@ public class AdminServiceImpl implements AdminService{
             throw new RuntimeException(e);
         }
     }
+    @Override
+    @Transactional
     public AdminDto logOut(){
         try {
             List<Admin> adminList = getFromExistingAdminJSON();
@@ -105,7 +112,16 @@ public class AdminServiceImpl implements AdminService{
             throw new RuntimeException(e);
         }
     }
+    @Override
+    @Transactional
+    public String sendReset(String username){
+        if (getUsername().equals(username)){
+            emailService.sendLink(emailService.getEmail());
+            return "Det har skickats ett mail där du kan återställa ditt lösenord.";
+        } else return "Den här adminen finns inte, kontrollera att du har stavat rätt eller lämna funktionen";
+    }
 
+    @SuppressWarnings("unchecked")
     private List<Admin> getFromExistingAdminJSON() throws IOException, ParseException {
         List<Admin> adminList = new ArrayList<>();
         JSONParser jsonParser = new JSONParser();
