@@ -21,6 +21,7 @@ import java.util.Objects;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+//import se.taekwondointernship.data.storage.Firebase;
 
 @Service
 public class PersonServiceImpl implements PersonService{
@@ -28,10 +29,13 @@ public class PersonServiceImpl implements PersonService{
     EmailServiceImpl emailService;
     MessageServiceImpl messageService;
     ModelMapper modelMapper;
+
+//    Firebase firebase = new Firebase();
+
     JSONParser jsonParser = new JSONParser();
     JSONArray memberList = new JSONArray();
     public PersonServiceImpl(PersonRepository personRepository, EmailServiceImpl emailService,
-                             MessageServiceImpl messageService, ModelMapper modelMapper){
+                             MessageServiceImpl messageService, ModelMapper modelMapper) {
         this.personRepository = personRepository;
         this.emailService = emailService;
         this.messageService = messageService;
@@ -39,32 +43,28 @@ public class PersonServiceImpl implements PersonService{
     }
     @Override
     @Transactional
+    @SuppressWarnings("unchecked")
     public PersonDto create(PersonForm form) {
         Person person = personRepository.save(modelMapper.map(form, Person.class));
         memberList.add(parsePerson(person));
-        emailService.sending(person.getEmail());
+        emailService.sendAttach(person.getEmail());
         printJSON(memberList);
+//        firebase.uploadMember(person);
         return modelMapper.map(person, PersonDto.class);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<PersonDto> findAll() {
-        List<Person> personList = new ArrayList<>();
+        List<Person> personList = getExistingMembers();
         List<PersonDto> personDtoList = new ArrayList<>();
-        try (FileReader reader = new FileReader("members.json")) {
-            Object obj = jsonParser.parse(reader);
-            JSONArray membersList = (JSONArray) obj;
-            membersList.forEach(mbr -> personList.add(parseJsonPerson((JSONObject) mbr)));
-            personList.forEach((person -> personDtoList.add(modelMapper.map(person, PersonDto.class))));
-        } catch (IOException | ParseException e){
-            e.printStackTrace();
-        }
+        personList.forEach(mbr -> personDtoList.add(modelMapper.map(mbr, PersonDto.class)));
         return personDtoList;
     }
 
     @Override
     @Transactional
+    @SuppressWarnings("unchecked")
     public void delete(Integer id){
         List<Person> personList = new ArrayList<>();
         try(FileReader reader = new FileReader("members.json")) {
@@ -83,6 +83,7 @@ public class PersonServiceImpl implements PersonService{
 
     @Override
     @Transactional
+    @SuppressWarnings("unchecked")
     public PersonDto findById(Integer id) {
         List<Person> personList = new ArrayList<>();
         Person person = new Person();
@@ -101,6 +102,33 @@ public class PersonServiceImpl implements PersonService{
         return modelMapper.map(person, PersonDto.class);
     }
 
+    @Override
+    @Transactional
+    @SuppressWarnings("unchecked")
+    public PersonDto unlock(Integer id){
+        List<Person> personList = new ArrayList<>();
+        PersonDto personDto = findById(id);
+        Person person = modelMapper.map(personDto, Person.class);
+        person.setLocked(false);
+        personList.add(person);
+        delete(id);
+        personList.forEach(mbr -> memberList.add(parsePerson(mbr)));
+        printJSON(memberList);
+        return modelMapper.map(person, PersonDto.class);
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<Person> getExistingMembers() {
+        List<Person> personList = new ArrayList<>();
+        try (FileReader reader = new FileReader("members.json")) {
+            Object obj = jsonParser.parse(reader);
+            JSONArray membersList = (JSONArray) obj;
+            membersList.forEach(mbr -> personList.add(parseJsonPerson((JSONObject) mbr)));
+        } catch (IOException | ParseException e){
+            e.printStackTrace();
+        }
+        return personList;
+    }
 
     private Person parseJsonPerson(JSONObject objectPerson){
         Integer personId = Integer.parseInt(String.valueOf(objectPerson.get("personId")));
@@ -117,6 +145,7 @@ public class PersonServiceImpl implements PersonService{
         boolean locked = Boolean.parseBoolean(String.valueOf(objectPerson.get("locked")));
         return new Person(personId, firstName, lastName, phoneNumber, parentName, parentNumber, email, socialSecurityNumber,age, permissionPhoto, passCount, locked);
     }
+    @SuppressWarnings("unchecked")
     private JSONObject parsePerson(Person person){
         JSONObject jsonPersonDetails = new JSONObject();
         String age = setAge(person.getSocialSecurityNumber());
