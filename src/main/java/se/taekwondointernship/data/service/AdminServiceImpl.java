@@ -17,6 +17,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class AdminServiceImpl implements AdminService{
@@ -85,6 +86,24 @@ public class AdminServiceImpl implements AdminService{
             throw new RuntimeException(e);
         }
     }
+
+    @Override
+    @Transactional
+    public AdminDto findByUsername(String username){
+        List<Admin> adminList;
+        try {
+            adminList = getFromExistingAdminJSON();
+        } catch (IOException | ParseException e) {
+            throw new RuntimeException(e);
+        }
+        Admin admin = new Admin();
+            for (Admin value : adminList){
+                if (Objects.equals(value.getUsername(), username)){
+                    admin = value;
+                }
+            }
+        return modelMapper.map(admin, AdminDto.class);
+        }
 
     @Override
     @Transactional

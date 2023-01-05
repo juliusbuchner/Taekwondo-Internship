@@ -49,6 +49,10 @@ public class AdminController {
     public ResponseEntity<?> logOut(){
         return ResponseEntity.ok(adminService.logOut());
     }
+    @GetMapping("/{username}")
+    public ResponseEntity<AdminDto> findByUsername(@PathVariable String username){
+        return ResponseEntity.ok(adminService.findByUsername(username));
+    }
 
     @GetMapping("/sendreset/{username}")
     public ResponseEntity<?> sendReset(@PathVariable String username){

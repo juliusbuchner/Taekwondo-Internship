@@ -1,6 +1,7 @@
 package se.taekwondointernship.data.service;
 
 import org.json.simple.parser.ParseException;
+import org.springframework.transaction.annotation.Transactional;
 import se.taekwondointernship.data.models.dto.AdminDto;
 import se.taekwondointernship.data.models.form.AdminForm;
 
@@ -14,6 +15,9 @@ public interface AdminService {
     String getPassword();
 
     String getUsername();
+
+    @Transactional
+    AdminDto findByUsername(String username);
 
     AdminDto logIn();
 
