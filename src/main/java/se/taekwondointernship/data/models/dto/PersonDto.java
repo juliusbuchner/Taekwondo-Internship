@@ -28,4 +28,5 @@ public class PersonDto {
 
     private boolean permissionPhoto;
 
+    private boolean locked;
 }

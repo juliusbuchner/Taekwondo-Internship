@@ -1,9 +1,5 @@
 package se.taekwondointernship.data.service;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,11 +7,8 @@ import se.taekwondointernship.data.models.dto.AdminDto;
 import se.taekwondointernship.data.models.entity.Admin;
 import se.taekwondointernship.data.models.form.AdminForm;
 import se.taekwondointernship.data.repository.AdminRepository;
+import se.taekwondointernship.data.storage.Firebase;
 
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -24,6 +17,7 @@ public class AdminServiceImpl implements AdminService{
     AdminRepository repository;
     ModelMapper modelMapper;
     EmailServiceImpl emailService;
+    Firebase firebase = new Firebase();
     public AdminServiceImpl(AdminRepository repository, EmailServiceImpl emailService, ModelMapper modelMapper){
         this.repository = repository;
         this.emailService = emailService;
@@ -33,69 +27,37 @@ public class AdminServiceImpl implements AdminService{
     @Override
     @Transactional
     public AdminDto create(AdminForm form) {
-        Admin admin = repository.save(modelMapper.map(form, Admin.class));
-        extractAdmin(admin);
+        Admin admin = modelMapper.map(form, Admin.class);
+        firebase.uploadAdmin(admin);
+        repository.save(admin);
         return modelMapper.map(admin, AdminDto.class);
     }
 
     @Override
     @Transactional
     public AdminDto editPassword(AdminForm form) {
-        try {
-            List<Admin> adminList = getFromExistingAdminJSON();
-            Admin admin = modelMapper.map(form, Admin.class);
-            admin.setUsername(adminList.get(0).getUsername());
-            admin.setId(1);
-            extractAdmin(admin);
-            return modelMapper.map(admin, AdminDto.class);
-        } catch (IOException | ParseException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    private void extractAdmin(Admin admin) {
-        JSONObject jsonAdminDetails = new JSONObject();
-        jsonAdminDetails.put("id", admin.getId());
-        jsonAdminDetails.put("username", admin.getUsername());
-        jsonAdminDetails.put("password", admin.getPassword());
-        try (FileWriter file = new FileWriter("admin.json")) {
-            file.write(jsonAdminDetails.toJSONString());
-            file.flush();
-        } catch (IOException e){
-            e.printStackTrace();
-        }
+        Admin admin = modelMapper.map(form, Admin.class);
+        firebase.editAdmin("password", form.getPassword());
+        return modelMapper.map(admin, AdminDto.class);
     }
     @Transactional(readOnly = true)
     public String getPassword(){
-        try {
-            List<Admin> adminList = getFromExistingAdminJSON();
-            return adminList.get(0).getPassword();
-        } catch (IOException | ParseException e) {
-            throw new RuntimeException(e);
-        }
+        List<Admin> adminList = getFromExistingAdmin();
+        return adminList.get(0).getPassword();
 
     }
 
     @Transactional(readOnly = true)
     public String getUsername(){
-        try {
-            List<Admin> adminList = getFromExistingAdminJSON();
-            return adminList.get(0).getUsername();
-        } catch (IOException | ParseException e){
-            throw new RuntimeException(e);
-        }
+        List<Admin> adminList = getFromExistingAdmin();
+        return adminList.get(0).getUsername();
     }
 
     @Override
     @Transactional
     public AdminDto findByUsername(String username){
         List<Admin> adminList;
-        try {
-            adminList = getFromExistingAdminJSON();
-        } catch (IOException | ParseException e) {
-            throw new RuntimeException(e);
-        }
+        adminList = getFromExistingAdmin();
         Admin admin = new Admin();
             for (Admin value : adminList){
                 if (Objects.equals(value.getUsername(), username)){
@@ -108,54 +70,28 @@ public class AdminServiceImpl implements AdminService{
     @Override
     @Transactional
     public AdminDto logIn(){
-        try {
-            List<Admin> adminList = getFromExistingAdminJSON();
-            Admin admin = adminList.get(0);
-            admin.setLoggedIn(true);
-            extractAdmin(admin);
-            return modelMapper.map(admin, AdminDto.class);
-        } catch (IOException | ParseException e){
-            throw new RuntimeException(e);
-        }
+        Admin admin = getFromExistingAdmin().get(0);
+        firebase.logInAdmin(admin);
+        return modelMapper.map(admin, AdminDto.class);
     }
     @Override
     @Transactional
     public AdminDto logOut(){
-        try {
-            List<Admin> adminList = getFromExistingAdminJSON();
-            Admin admin = adminList.get(0);
-            admin.setLoggedIn(false);
-            extractAdmin(admin);
-            return modelMapper.map(admin, AdminDto.class);
-        } catch (IOException | ParseException e){
-            throw new RuntimeException(e);
-        }
+        Admin admin = getFromExistingAdmin().get(0);
+        firebase.logOutAdmin(admin);
+        return modelMapper.map(admin, AdminDto.class);
     }
     @Override
     @Transactional
     public String sendReset(String username){
-        if (getUsername().equals(username)){
+        if (username.equals(getUsername())){
+            System.out.println(emailService.getEmail());
             emailService.sendLink(emailService.getEmail());
             return "Det har skickats ett mail där du kan återställa ditt lösenord.";
         } else return "Den här adminen finns inte, kontrollera att du har stavat rätt eller lämna funktionen";
     }
 
-    @SuppressWarnings("unchecked")
-    private List<Admin> getFromExistingAdminJSON() throws IOException, ParseException {
-        List<Admin> adminList = new ArrayList<>();
-        JSONParser jsonParser = new JSONParser();
-        FileReader reader = new FileReader("admin.json");
-        Object obj = jsonParser.parse(reader);
-        JSONArray jsonAdminList = new JSONArray();
-        jsonAdminList.add(obj);
-        jsonAdminList.forEach(mbr -> adminList.add(parseJsonAdmin((JSONObject) mbr)));
-        return adminList;
-    }
-
-    private Admin parseJsonAdmin(JSONObject objectAdmin) {
-        Integer id = Integer.parseInt(String.valueOf(objectAdmin.get("id")));
-        String username = (String) objectAdmin.get("username");
-        String password = (String) objectAdmin.get("password");
-        return new Admin(id, username, password);
+    private List<Admin> getFromExistingAdmin() {
+        return firebase.findAdmin();
     }
 }

@@ -12,7 +12,6 @@ import java.util.Objects;
 @Entity
 public class Person {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer personId;
     private String firstName;
     private String lastName;

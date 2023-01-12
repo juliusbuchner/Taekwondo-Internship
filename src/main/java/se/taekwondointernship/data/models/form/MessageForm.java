@@ -8,5 +8,6 @@ import lombok.*;
 @NoArgsConstructor
 @ToString
 public class MessageForm {
+    private String messageType;
     private String messageContent;
 }

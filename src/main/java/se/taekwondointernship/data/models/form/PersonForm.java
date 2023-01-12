@@ -17,13 +17,13 @@ public class PersonForm {
     @NotBlank(message = "Ditt efternamn kan inte vara tomt.")
     private String lastName;
 
-    @NotBlank(message = "Din email kan inte vara tom.")
+    @NotBlank(message = "Din mail kan inte vara tom.")
     private String email;
 
     @NotBlank(message = "Om du inte har något eget telefonnummer kan du skriva din kontaktpersons nummer.")
     private String phoneNumber;
 
-    @NotBlank(message = "Du måste ha med de 10 siffrorna av ditt personnummer.")
+    @NotBlank(message = "Du måste ha med de 10 siffrorna av ditt personnummer i form av xxxxxx-xxxx.")
     private String socialSecurityNumber;
 
     @NotBlank(message = "Om du är vuxen kan du skriva ditt eget eller någon näraståendes namn.")

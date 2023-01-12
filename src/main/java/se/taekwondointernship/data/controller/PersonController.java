@@ -11,7 +11,7 @@ import se.taekwondointernship.data.service.PersonService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/participant")
+@RequestMapping("/member")
 public class PersonController {
     private final PersonService personService;
     @Autowired
@@ -37,8 +37,12 @@ public class PersonController {
     public ResponseEntity<PersonDto> findById(@PathVariable Integer id){
         return ResponseEntity.ok(personService.findById(id));
     }
-    @PutMapping(path = "/{id}")
+    @PutMapping(path = "/unlock/{id}")
     public ResponseEntity<PersonDto> unlockById(@PathVariable Integer id){
         return ResponseEntity.ok(personService.unlock(id));
+    }
+    @PutMapping(path = "/lock/{id}")
+    public ResponseEntity<PersonDto> lockById(@PathVariable Integer id){
+        return ResponseEntity.ok(personService.lock(id));
     }
 }

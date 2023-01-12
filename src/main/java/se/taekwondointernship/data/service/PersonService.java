@@ -1,5 +1,6 @@
 package se.taekwondointernship.data.service;
 
+import org.springframework.transaction.annotation.Transactional;
 import se.taekwondointernship.data.models.dto.PersonDto;
 import se.taekwondointernship.data.models.form.PersonForm;
 
@@ -11,4 +12,7 @@ public interface PersonService {
     void delete(Integer id);
     PersonDto findById(Integer id);
     PersonDto unlock(Integer id);
+
+    @Transactional
+    PersonDto lock(Integer id);
 }

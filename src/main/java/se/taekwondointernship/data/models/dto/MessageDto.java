@@ -9,5 +9,6 @@ import lombok.*;
 @ToString
 public class MessageDto {
     private Integer messageId;
+    private String messageType;
     private String messageContent;
 }

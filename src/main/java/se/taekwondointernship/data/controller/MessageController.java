@@ -19,39 +19,39 @@ public class MessageController {
     @PostMapping(path = "/welcome")
     public ResponseEntity<MessageDto> createWelcome(@RequestBody MessageForm form){
         System.out.println("### In Create Method ###");
-        return ResponseEntity.status(HttpStatus.CREATED).body(messageService.create(form, "welcomeMessage.json"));
+        return ResponseEntity.status(HttpStatus.CREATED).body(messageService.create(form, "welcome"));
     }
     @PutMapping(path = "/welcome")
     public ResponseEntity<MessageDto> editWelcome(@RequestBody MessageForm form){
-        return ResponseEntity.ok(messageService.edit(form, "welcomeMessage.json"));
+        return ResponseEntity.ok(messageService.edit("welcome", form));
     }
     @GetMapping(path = "/welcome")
     public ResponseEntity<MessageDto> findWelcome(){
-        return ResponseEntity.ok(messageService.findMessage("welcomeMessage.json"));
+        return ResponseEntity.ok(messageService.findMessage("welcome"));
     }
     @PostMapping(path = "/news")
     public ResponseEntity<MessageDto> createNews(@RequestBody MessageForm form){
         System.out.println("### In Create Method ###");
-        return ResponseEntity.status(HttpStatus.CREATED).body(messageService.create(form, "newsMessage.json"));
+        return ResponseEntity.status(HttpStatus.CREATED).body(messageService.create(form, "news"));
     }
     @PutMapping(path = "/news")
     public ResponseEntity<MessageDto> editNews(@RequestBody MessageForm form){
-        return ResponseEntity.ok(messageService.edit(form, "newsMessage.json"));
+        return ResponseEntity.ok(messageService.edit("news", form));
     }
     @GetMapping(path = "/news")
     public ResponseEntity<MessageDto> findNews(){
-        return ResponseEntity.ok(messageService.findMessage("newsMessage.json"));
+        return ResponseEntity.ok(messageService.findMessage("news"));
     }
     @PostMapping(path = "/email")
     public ResponseEntity<MessageDto> createMail(@RequestBody MessageForm form){
-        return ResponseEntity.status(HttpStatus.CREATED).body(messageService.create(form, "emailMessage.json"));
+        return ResponseEntity.status(HttpStatus.CREATED).body(messageService.create(form, "email"));
     }
     @PutMapping(path = "/email")
     public ResponseEntity<MessageDto> editMail(@RequestBody MessageForm form){
-        return ResponseEntity.ok(messageService.edit(form, "emailMessage.json"));
+        return ResponseEntity.ok(messageService.edit("email", form));
     }
     @GetMapping(path = "/email")
     public ResponseEntity<MessageDto> findMail(){
-        return ResponseEntity.ok(messageService.findMessage("emailMessage.json"));
+        return ResponseEntity.ok(messageService.findMessage("email"));
     }
 }

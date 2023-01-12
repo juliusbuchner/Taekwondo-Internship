@@ -25,10 +25,11 @@ public class AdminController {
         return ResponseEntity.status(HttpStatus.CREATED).body(adminService.create(form));
     }
     @PutMapping("/edit/{oldPassword}")
-    public ResponseEntity<?> edit(@RequestBody AdminForm form, @PathVariable String oldPassword){
+    public ResponseEntity<?> edit(@RequestBody String password, @PathVariable String oldPassword){
         if (oldPassword.equals(adminService.getPassword())){
+            AdminForm adminForm = new AdminForm(adminService.getUsername(), password);
             try {
-                return ResponseEntity.ok(adminService.editPassword(form));
+                return ResponseEntity.ok(adminService.editPassword(adminForm));
             } catch (IOException | ParseException e) {
                 throw new RuntimeException(e);
             }
@@ -56,19 +57,19 @@ public class AdminController {
 
     @GetMapping("/sendreset/{username}")
     public ResponseEntity<?> sendReset(@PathVariable String username){
-        return ResponseEntity.ok(adminService.sendReset(username));
+            return ResponseEntity.ok(adminService.sendReset(username));
     }
 
     @PutMapping("/reset/{username}")
     public ResponseEntity<?> reset(@RequestBody String newPassword, @PathVariable String username){
-            try {
                 if (adminService.getUsername().equals(username)) {
                     AdminForm form = new AdminForm(adminService.getUsername(), newPassword);
-                    return ResponseEntity.ok(adminService.editPassword(form));
+                    try {
+                        return ResponseEntity.ok(adminService.editPassword(form));
+                    } catch (IOException | ParseException e) {
+                        throw new RuntimeException(e);
+                    }
                 } else return ResponseEntity.status(403).body("Användarnamnet är fel. Om du " +
                         "inte är behörig, var god och låt bli admin.");
-            } catch (IOException | ParseException e) {
-                throw new RuntimeException(e);
-            }
     }
 }

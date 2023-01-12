@@ -13,4 +13,6 @@ public class AdminDto {
     private String username;
 
     private String password;
+
+    private boolean isLoggedIn;
 }
